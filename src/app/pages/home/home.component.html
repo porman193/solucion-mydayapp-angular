@@ -8,43 +8,34 @@
         placeholder="Type new todo"
         autofocus
         type="text"
+        (change)="addTask($event)"
+        [formControl]="newTaskCtrl"
+        (keydown.enter)="addTask($event)"
       />
     </div>
   </header>
   <div class="container todoapp-wrapper">
     <!-- This section should be hidden by default and shown when there are todos -->
-    <section class="main">
+    <section *ngIf="((tasks$ | async)?.length || 0) > 0" class="main">
       <ul class="todo-list">
-        <li class="completed">
+        <li *ngFor="let task of tasks$ | async" [class.completed]="task.completed" [class.editing]="task.edit" (dblclick)="changeEditState(task.id)">
           <div class="view">
-            <input class="toggle" type="checkbox" checked />
-            <label>Learn JavaScript</label>
-            <button class="destroy"></button>
+            <input class="toggle" type="checkbox" [checked]="task.completed" (change)="toggleTaskCompletion(task.id)" />
+            <label>{{ task.title }}</label>
+            <button (click)="removeTask(task.id)" class="destroy"></button>
           </div>
-          <input class="edit" value="Learn JavaScript" />
-        </li>
-        <li>
-          <div class="view">
-            <input class="toggle" type="checkbox" />
-            <label>Buy a unicorn</label>
-            <button class="destroy"></button>
-          </div>
-          <input class="edit" value="Buy a unicorn" />
-        </li>
-        <li class="editing">
-          <div class="view">
-            <input class="toggle" type="checkbox" />
-            <label>Make dishes</label>
-            <button class="destroy"></button>
-          </div>
-          <input class="edit" value="Make dishes" />
+          <input class="edit"
+          [value]="task.title"
+          (change)="updateTask(task,$event)"
+          (keydown.escape)="updateTask(task, $event)"
+          />
         </li>
       </ul>
     </section>
     <!-- This footer should be hidden by default and shown when there are todos -->
-    <footer class="footer">
+    <footer class="footer" *ngIf="((tasks$ | async)?.length || 0) > 0">
       <!-- This should be `0 items left` by default -->
-      <span class="todo-count"><strong>0</strong> item left</span>
+      <span class="todo-count"><strong>{{ (tasks$ | async)?.length || 0 }}</strong> item left</span>
       <!-- Remove this if you don't implement routing -->
       <ul class="filters">
         <li>
